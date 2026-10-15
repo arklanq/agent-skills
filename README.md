@@ -1,16 +1,16 @@
 # Agent Skills
 
-Personal skills for Git and GitHub workflows.
+A personal collection of reusable agent skills.
 
 - [commit](skills/commit/SKILL.md): Create focused commits with Conventional Commits messages.
-- [github-pr](skills/github-pr/SKILL.md): Create and update GitHub pull requests.
+- [github-pr](skills/github-pr/SKILL.md): Create and update concise, well-structured GitHub pull requests with consistent conventions and verified base branches.
 
 ## Installation
 
-Install both skills with [skills.sh](https://skills.sh/docs):
+Install skills with [skills.sh](https://skills.sh/docs):
 
 ```bash
-npx skills add arklanq/agent-skills --skill commit github-pr
+npx skills add arklanq/agent-skills
 ```
 
 ## Requirements
