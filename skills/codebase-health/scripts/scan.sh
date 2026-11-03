@@ -196,6 +196,18 @@ matching '(vitest|jest|playwright|cypress)[^/]*\.(json|[cm]?[jt]s)$|\.github/wor
 section 'Test files without obvious assertions'
 test_files | tr '\n' '\0' | xargs -0 grep -LE 'expect|assert|should|toMatch|toBe|toHave|cy\.|snapshot' 2>/dev/null | head -30 || true
 
+section 'Test files with the most test declarations (>= 15; loops and .each add more at runtime)'
+test_files | count_list '^[[:space:]]*(it|test)(\.(each|concurrent|serial|for))*[(`[]' 50 | awk '$1 >= 15' || true
+
+section 'Test files that generate tests in loops (count = test declarations inside loops)'
+# A test declared within 3 lines after a loop header counts as generated.
+test_files | tr '\n' '\0' | xargs -0 awk '
+  FNR == 1 { loop = -10 }
+  /^[[:space:]]*(for|while)[[:space:]]*\(|\.(forEach|map)\(/ { loop = FNR }
+  /^[[:space:]]*(it|test)(\.[a-z]+)*\(/ && FNR - loop <= 3 { n[FILENAME]++ }
+  END { for (f in n) printf "%5d  %s\n", n[f], f }
+' 2>/dev/null | sort -rn | head -30 || true
+
 section 'Type and lint suppressions (per file)'
 source_files | count_list '@ts-ignore|@ts-nocheck|@ts-expect-error|eslint-disable|biome-ignore|\bas any\b|:[[:space:]]*any\b|<any>|# ?noqa|# type: ?ignore' 30
 

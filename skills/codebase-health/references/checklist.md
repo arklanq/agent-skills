@@ -142,6 +142,15 @@ Tests are only useful when the team trusts them.
   on failure or retry, a sensible worker count, only the browsers that matter.
 - Speed: slow suites get skipped by people; note the duration and the slowest
   files when you run them.
+- Test file size and balance: a file with many tests, or with loops or `.each`
+  generating them, is a lead even below the line threshold. When the runner
+  keeps a file on one worker (no `fullyParallel` in Playwright, Vitest's
+  default per-file workers, sharding by file), the slowest file sets the floor
+  for the whole run or shard. Take per-file durations from the runner's JSON
+  report or CI log (Playwright's "Slow test file" lines), compare the slowest
+  file with the shard or run total, and split files by feature or scenario
+  until no single file dominates. Loops that reload the page for every case
+  usually belong in a unit test, with one end-to-end case left.
 
 ## 6. CI/CD
 
