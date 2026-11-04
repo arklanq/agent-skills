@@ -15,6 +15,14 @@ Install skills with [skills.sh](https://skills.sh/docs):
 npx skills add arklanq/agent-skills
 ```
 
+To pin a specific version, add its release tag after `#`, for example:
+
+```bash
+npx skills add arklanq/agent-skills#v1.0.0
+```
+
+See [Releases](https://github.com/arklanq/agent-skills/releases) for available versions and changes.
+
 ## Requirements
 
 - Node.js and npm for installation.
