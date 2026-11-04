@@ -1,0 +1,16 @@
+{
+  "title": "Example dashboard",
+  "goal": "Demo data · five task statuses in one minimal view.",
+  "now": "Preparing the result preview.",
+  "next": "Check the result after the preview.",
+  "tasks": [
+    {"id": "example-done", "title": "Agree on the scope", "status": "done", "evidence": "The scope was confirmed."},
+    {"id": "example-doing", "title": "Result preview", "status": "doing", "evidence": "The view is being prepared."},
+    {"id": "example-blocked", "title": "Publication", "status": "blocked", "blocker": "Waiting for the user's approval."},
+    {"id": "example-todo", "title": "Check the result", "status": "todo"},
+    {"id": "example-unknown", "title": "Additional scope", "status": "unknown"}
+  ],
+  "milestones": [],
+  "decisions": [{"id": "example-approval", "title": "Approval to publish", "blocking": true, "default": "Keep the publication on hold."}],
+  "events": []
+}

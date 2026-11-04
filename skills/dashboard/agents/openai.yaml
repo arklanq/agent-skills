@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dashboard"
+  short_description: "Live dashboard of the main agent's current work"
+  default_prompt: "Use $dashboard to open a live visual tracker for our current work and keep it updated."
