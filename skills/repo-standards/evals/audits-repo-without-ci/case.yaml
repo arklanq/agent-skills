@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: audits-repo-without-ci
+expected_outcome: |
+  Lists the failing merge settings and the missing ruleset, proposes a ruleset without required status checks because the repository has no checks, and changes nothing.

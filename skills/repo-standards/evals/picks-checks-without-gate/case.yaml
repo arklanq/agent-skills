@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: picks-checks-without-gate
+expected_outcome: |
+  Reports the missing ruleset, picks required checks from the workflows with reasons because there is no gate, marks the choice as improvised, and changes nothing.

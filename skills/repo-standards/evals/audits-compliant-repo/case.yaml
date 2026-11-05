@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: audits-compliant-repo
+expected_outcome: |
+  Reports the repository as compliant, identifies gate as the required check, and proposes no changes.
