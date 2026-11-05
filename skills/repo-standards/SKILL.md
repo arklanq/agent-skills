@@ -43,7 +43,8 @@ Use the repository the user named, otherwise the one in the current directory.
 
 `audit.sh` prints `STATUS`, check, expected, and actual. `UNKNOWN` means the value
 could not be read, for example without admin access or on a private repository whose
-plan has no rulesets. Report it as not verified, never as a pass or a failure.
+plan has no rulesets. Report it as not verified, never as a pass or a failure. `REVIEW`
+marks the required status checks, which Step 2 decides.
 
 ## Step 2: Decide the required status checks
 
@@ -51,18 +52,26 @@ This is the one standard that needs judgment. A wrong choice is costly: a requir
 check that never runs blocks every pull request forever, so go down this list and stop
 at the first match, using the output of `discover-checks.sh`.
 
-1. **`gate` exists.** It appears in the check table, or a workflow that runs on
-   `pull_request` defines it. Require exactly `gate`. The context is the job's `name:`
-   when set, otherwise its id, so a job with id `gate` and `name: Gate` reports as `Gate`
-   and counts as this case with that spelling. Say so if it has not run yet.
-2. **No `gate`, but other usable checks exist.** Pick them and explain each pick. A check
-   is usable only if it reports on every pull request. Reject checks that:
-   - run only on `push`, `schedule`, or `workflow_dispatch`, so a pull request never gets them;
-   - have `paths` or `branches` filters on the trigger, because a skipped workflow leaves
-     the check waiting forever;
-   - have a job-level `if:` that can skip them, because GitHub treats a skipped job as passed;
+1. **`gate` runs on every pull request.** A workflow that defines it triggers on pull
+   requests to the default branch with no filter that can skip it, or the check table shows
+   it on the latest pull request. A `gate` seen only on older pull requests no longer runs,
+   so it does not count. Require exactly `gate`. The context is the job's `name:` when set,
+   otherwise its id, so a job with id `gate` and `name: Gate` reports as `Gate` and counts
+   as this case with that spelling. Say so if it has not run yet. If the job has `needs:`
+   without `if: always()`, flag it in the report: a failed dependency skips the job, and
+   GitHub treats a skipped job as passed, so the pull request could merge.
+2. **No such `gate`, but other usable checks exist.** Pick them and explain each pick. A check
+   is usable only if it reports on every pull request to the default branch and cannot pass
+   without doing its work. Reject checks that:
+   - run only on `push`, `schedule`, or `workflow_dispatch`, or on pull request `types` that
+     leave out `synchronize`, so a pull request can lack a current result;
+   - have `paths` or `paths-ignore` filters, or `branches` filters that leave out the default
+     branch, because a skipped workflow leaves the check waiting forever;
+   - have a job-level `if:` that can skip them, or `needs:` without `if: always()`, because
+     GitHub treats a skipped job as passed;
    - have a matrix whose values may change, because each value is a separate check name;
-   - belong to a disabled workflow, deploy previews, bots, or labelers, or rarely pass in the check table.
+   - belong to a disabled workflow, deploy previews, bots, or labelers, are missing from the
+     latest pull request, or rarely pass in the check table.
 
    Prefer the checks that verify the code (build, lint, tests). Mark this as an improvised
    choice for the user to confirm, and mention that a single `gate` job would be more durable.
@@ -111,7 +120,10 @@ Keep to these rules:
 
 - Put only differences in the table, with passing items as a count. Merge the title and
   message of one commit default into a single row.
-- Omit any section with nothing to say, except the required checks line.
+- Omit any section with nothing to say, except the required checks line. With no usable
+  checks, that line reads `none` and gives the reason.
+- With no differences but some `UNKNOWN` items, use **Not fully verified** as the result
+  rather than **Compliant**, and keep the "Not verified" section.
 - Keep each line to one fact and its evidence. Do not explain what a setting does, repeat
   the table in prose, or paste a ruleset payload unless the user asks.
 - List rejected checks only for case 2 of Step 2, with one short reason each.

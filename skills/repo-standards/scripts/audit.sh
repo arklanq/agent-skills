@@ -52,6 +52,11 @@ expect "$settings" "Allow merge commits" .allow_merge_commit true
 expect "$settings" "Merge default commit title" .merge_commit_title PR_TITLE
 expect "$settings" "Merge default commit message" .merge_commit_message BLANK
 
+# Classic protection applies on top of rulesets, so its stricter rules would still bind.
+branch=$(jq -r .default_branch <<<"$settings")
+gh api "repos/$repo/branches/$branch/protection" >/dev/null 2>&1 && \
+  emit NOTE "Classic branch protection also applies to $branch" "-" "enabled"
+
 echo "# Ruleset: main branch protection"
 if ! list=$(gh api --paginate "repos/$repo/rulesets?includes_parents=true" 2>&1); then
   # Private repositories on the Free plan answer 403 here.
@@ -90,7 +95,8 @@ for id in $ids; do
     expect "$checks" "Require branches to be up to date" .strict_required_status_checks_policy true
   fi
 
-  jq -e 'any(.rules[]; .type == "pull_request")' <<<"$rs" >/dev/null || note_direct_pushes
+  # An inactive ruleset does not stop direct pushes yet, even with the rule in place.
+  jq -e '.enforcement == "active" and any(.rules[]; .type == "pull_request")' <<<"$rs" >/dev/null || note_direct_pushes
 
   # Not part of the standard, but each can undermine it.
   methods=$(jq -r '[.rules[] | select(.type == "pull_request").parameters.allowed_merge_methods // [] | .[]] | sort | join(",")' <<<"$rs")

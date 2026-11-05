@@ -26,17 +26,20 @@ else
       | jq -c --arg sha "$sha" '. + {sha: $sha}')
     rows+="$runs"$'\n'"$statuses"$'\n'
   done
-  jq -s -r --argjson total "$total" '
+  # A check missing from the newest pull request may no longer run at all.
+  latest=$(jq -r '.[0].headRefOid' <<<"$prs")
+  jq -s -r --argjson total "$total" --arg latest "$latest" '
     group_by(.name)
     | map({
         name: .[0].name,
         source: .[0].source,
         prs: (map(.sha) | unique | length),
+        on_latest: (if any(.[]; .sha == $latest) then "yes" else "no" end),
         results: (group_by(.result) | map("\(.[0].result)=\(length)") | join(" "))
       })
     | sort_by(-.prs, .name)
-    | (["CHECK", "SOURCE", "SEEN_ON_PRS", "RESULTS"] | @tsv),
-      (.[] | [.name, .source, "\(.prs)/\($total)", .results] | @tsv)
+    | (["CHECK", "SOURCE", "SEEN_ON_PRS", "ON_LATEST_PR", "RESULTS"] | @tsv),
+      (.[] | [.name, .source, "\(.prs)/\($total)", .on_latest, .results] | @tsv)
   ' <<<"$rows"
 fi
 
