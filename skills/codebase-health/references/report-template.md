@@ -48,6 +48,14 @@ Effort: S / M / L
 
 **L1. ...**
 
+## CI timing
+
+Include when CI timing was measured. Median seconds over <N> successful runs.
+
+| Workflow / job | Queue | Setup | Work | Total |
+| --- | --- | --- | --- | --- |
+| <workflow> / <job> | | | | |
+
 ## Fix plan
 
 Batches in recommended order. Each batch is independent and verifiable.

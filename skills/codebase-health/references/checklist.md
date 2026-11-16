@@ -81,6 +81,15 @@ feature from scratch instead of finding the existing mechanism.
   error handling that only logs.
 - Inconsistent naming of files and symbols within the same layer.
 - Dead branches behind constant conditions; commented-out code.
+- Implicit state machines: one thing (a request, a form, a dialog, an order, a
+  connection) described by several boolean flags or loosely typed status
+  values, with transitions spread across handlers, callbacks or effects. This
+  allows impossible combinations (loading and failed at once) and every new
+  case adds another flag. Fix: one status value with an explicit set of states
+  (an enum, a union type or the language's equivalent) and transitions in one
+  place. Suggest a state-machine library only for complex flows and only if it
+  fits the stack; preserve behaviour, including the states the UI or API
+  exposes.
 
 ## 4. Framework and tooling practices
 
@@ -163,6 +172,22 @@ CI should be correct, current, fast and cheap.
   `actions/setup-node`), pinned by tag or SHA consistently; runner images not
   deprecated; Node.js version taken from `.nvmrc` or `package.json` via
   `node-version-file`, not hard-coded in several places.
+- Measured time: for GitHub Actions, list recent successful runs with
+  `gh run list --status success --limit 150 --json databaseId,workflowName`,
+  then read each run's jobs with
+  `gh api repos/{owner}/{repo}/actions/runs/<id>/jobs --paginate`. Each job has
+  `created_at`, `started_at`, `completed_at` and timed `steps`. Split it into:
+  - Queue: `started_at` minus `created_at`, waiting for a runner.
+  - Setup: job preparation, checkout, toolchain or runtime setup, dependency
+    installation, cache or artifact restore, and post-job cleanup steps.
+    Classify steps by the action they use and by their name.
+  - Work: the remaining steps, the task the job exists for.
+  Aggregate per workflow and job name with median and p90, list the 5 slowest
+  jobs, and use the dominant part to choose the fix: long queues point to
+  runner capacity, concurrency or too many parallel jobs; long setup points to
+  caching, install method or checkout depth; long work points to splitting,
+  sharding or running less. Leave out skipped and cancelled jobs; they distort
+  the numbers.
 - Speed and cost: dependency caching, a frozen-lockfile install with the
   project's package manager instead of a plain install, `concurrency` with `cancel-in-progress` for pull
   requests, path filters for docs-only changes, `timeout-minutes` on jobs, jobs
@@ -253,6 +278,8 @@ Good documentation is short, concrete and still true.
 Quick list to keep in mind across all areas:
 
 - New helper or component written next to an existing one that does the same.
+- Another boolean flag or status string added for each new case instead of
+  extending one explicit state.
 - Copies with suffixes (`v2`, `new`, `copy`, `fixed`) and the old version kept.
 - God files that grew by appending instead of splitting.
 - Plan, summary, progress and report Markdown files in the repository.

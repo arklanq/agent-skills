@@ -1,6 +1,6 @@
 ---
 name: codebase-health
-description: Review a repository's structural health and maintainability, with a front-end focus, then fix what the user approves. Checks file organization, oversized files and flat directories, duplicated logic instead of reuse, flaky or dead tests, CI/CD and test configuration, framework best practices, outdated or vulnerable dependencies, Node.js and package-manager setup, dead scripts, leftover files, documentation bloat, excessive comments and non-English code. Use when the user asks for a codebase or repo health check, maintainability or tech-debt review, cleanup or tidy-up, a check of what AI agents did to the codebase, even if they never say "health". Not for reviewing a single diff or PR, or for a dedicated security audit.
+description: Review a repository's structural health and maintainability, with a front-end focus, then fix what the user approves. Checks file organization, oversized files and flat directories, duplicated logic instead of reuse, flaky or dead tests, CI/CD and test configuration, framework best practices, outdated or vulnerable dependencies, Node.js and package-manager setup, dead scripts, leftover files, documentation bloat, excessive comments and non-English code. Use when the user asks for a codebase or repo health check, maintainability or tech-debt review, cleanup or tidy-up, a check of what AI agents did to the codebase, even if they never say "health". Assumes a Git repository hosted on GitHub. Not for reviewing a single diff or PR, or for a dedicated security audit.
 ---
 
 # Codebase Health
@@ -15,8 +15,21 @@ The work has two phases: a read-only review that ends in a Markdown report, then
 fixes for the items the user approves, delivered as pull requests. Do not change
 files during the review.
 
+## Requirements
+
+The skill assumes a Git repository hosted on GitHub and the GitHub CLI (`gh`),
+authenticated, which it uses for CI history, pull requests and merges. Nothing
+else is assumed: the checks apply to any language, framework, package manager
+or CI provider.
+
+If `gh` is missing or not authenticated, still run the review, list the checks
+that needed it under "Not checked" in the report, and ask the user how to
+deliver fixes before Step 7.
+
 ## Step 1: Set the Scope
 
+- Confirm the requirements: `git remote -v` points to GitHub and
+  `gh auth status` succeeds.
 - Review the whole repository unless the user names a path, package or area.
 - Read the project's own rules first: `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`,
   ADRs, lint and formatter configs. Documented conventions override the defaults
@@ -57,8 +70,15 @@ Then gather what the script cannot:
   `yarn dlx` or `bunx`) and wait for the user's answer; never add it to the
   project during review.
 - Test health: run the test suite once if it is reasonably fast; note failures,
-  skipped tests and duration. When `gh` is available, recent CI runs
-  (`gh run list --limit 30`) show flaky or slow jobs.
+  skipped tests and duration. Recent CI runs (`gh run list`) show flaky jobs:
+  the same job failing and passing on the same commit.
+- CI timing: measure where CI time goes instead of judging it from the
+  workflow files. Pull the jobs of the last 100-150 successful runs and split
+  each job's time into queue, setup and work, as described in section 6 of the
+  checklist. Report the 5 slowest jobs with the median seconds of each part.
+  If the project uses a CI provider other than GitHub Actions, use that
+  provider's API or CLI when available; otherwise list the check under
+  "Not checked".
 
 ## Step 3: Review Each Area
 
@@ -171,8 +191,8 @@ and commit as you go; the user reviews the result as pull requests.
 ## Step 7: Open Pull Requests
 
 Push the work and open pull requests. If any skill for creating pull requests is
-available, use it; otherwise use the hosting platform's CLI, such as `gh`, and
-the project's pull request template.
+available, use it; otherwise use `gh` and the project's pull request
+template.
 
 - Open one pull request when the change is easy to review in one sitting.
 - Split large work into stacked pull requests, one per batch or group of related
