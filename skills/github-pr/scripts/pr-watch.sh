@@ -28,10 +28,11 @@ usage() {
   exit 2
 }
 
-# Reads one tab-separated line from fetch and prints "<result>\t<details>", or nothing while waiting.
+# Reads one "|"-separated line from fetch and prints "<result>\t<details>", or nothing while waiting.
+# A tab separator would let read merge an empty field into the next one.
 classify() {
   local state merge_state draft auto_merge failed pending total
-  IFS=$'\t' read -r state merge_state draft auto_merge failed pending total
+  IFS='|' read -r state merge_state draft auto_merge failed pending total
 
   case "$state" in
     MERGED) printf 'merged\tmerged\n'; return ;;
@@ -69,7 +70,7 @@ fetch() {
       end] as $c
     | [.state, .mergeStateStatus, (.isDraft | tostring), (.autoMergeRequest != null | tostring),
        ($c | map(select(. == "failed")) | length), ($c | map(select(. == "pending")) | length), ($c | length)]
-    | @tsv'
+    | map(tostring) | join("|")'
 }
 
 main() {
@@ -83,7 +84,7 @@ main() {
     esac
   done
   [ -n "$url" ] || usage
-  [[ "$interval" =~ ^[0-9]+$ && "$timeout" =~ ^[0-9]+$ ]] || usage
+  [[ "$interval" =~ ^[1-9][0-9]*$ && "$timeout" =~ ^[0-9]+$ ]] || usage
 
   if ! gh pr view "$url" --json number >/dev/null 2>&1; then
     echo "pr-watch: $url -> error: cannot read the pull request"
