@@ -1,6 +1,6 @@
 ---
 name: github-pr
-description: Create or update GitHub pull requests with gh CLI, safe base-branch selection, and optional ticket metadata. Use for every GitHub pull request you create or update, whether the user asks for one or you open it as part of a task.
+description: Create or update GitHub pull requests with gh CLI, safe base-branch selection, and optional ticket metadata, and wait for their checks or merge. Use for every GitHub pull request you create or update, whether the user asks for one or you open it as part of a task, and when remaining steps wait for a pull request's checks or merge.
 ---
 
 # GitHub Pull Request
@@ -122,6 +122,36 @@ Created or updated PR
 * PR URL: <url>
 * Ticket: <id and provider, only when detected>
 ```
+
+### Waiting for the PR
+
+When remaining steps depend on the PR's state, for example "merge when the checks
+are green" or "clean up after the merge", wait with the bundled watcher instead
+of ending the task and asking the user to report back:
+
+```bash
+<skill-location-dir>/scripts/pr-watch.sh <pr-url>
+```
+
+- Start it right after pushing, as a background command whose exit wakes you
+  (in Claude Code: Bash with `run_in_background: true`), then end your turn.
+  Never run it in the foreground.
+- It checks the PR every 15 seconds and exits after 3 hours at most, printing
+  one line: `pr-watch: <url> -> <result>: <details>`. With auto-merge enabled,
+  green checks do not end it; it waits for the merge.
+- Run one watcher per PR. When you watch several, use the URL in the result line
+  to tell them apart.
+
+Act on the result:
+
+| Result | Action |
+|---|---|
+| `merged` | Carry out the post-merge steps the user asked for. |
+| `ready` | Merge if the user asked you to; otherwise tell the user it is ready. |
+| `behind` | Update the branch with the base branch, push, and start a new watcher. |
+| `failed`, `conflict` | Fix it, push, and start a new watcher. If another tool reports the same failure, handle it once. |
+| `blocked`, `draft` | Tell the user what the PR waits for. |
+| `closed`, `timeout`, `error` | Check the PR and report its state to the user. |
 
 ### Finalization
 
