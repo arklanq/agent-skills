@@ -28,5 +28,5 @@ See [Releases](https://github.com/arklanq/agent-skills/releases) for available v
 - Node.js and npm for installation.
 - Bash and Git for the context scripts.
 - Node.js 18+ on macOS or Linux for the `dashboard` runtime.
-- Authenticated GitHub CLI (`gh`) for `github-pr` and `codebase-health` pull requests.
+- Authenticated GitHub CLI (`gh`) for `github-pr`, and for `codebase-health` CI history and pull requests.
 - Optional: ripgrep (`rg`) for detecting ticket-provider references.
