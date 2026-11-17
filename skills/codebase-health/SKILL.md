@@ -120,7 +120,7 @@ results:
 - Collect the status rows, extra tables and "Not checked" items for the report.
   When two areas report parts of the same table row, keep the worse status and
   join their summaries. If a subagent reports tracked or new files changed by
-  its commands, tell the user in the chat summary.
+  its commands, list them in the report and tell the user in the chat summary.
 
 ## Step 4: Write the Report
 
