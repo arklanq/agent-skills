@@ -24,7 +24,7 @@ findings below, not to review the docs sentence by sentence.
 Leave these to the named area even when you notice them:
 
 - Comments in code: code quality.
-- Script files and scripts declared in manifests: dependencies.
+- Script files and `package.json` scripts: dependencies.
 
 ## Leftover and Misleading Files
 

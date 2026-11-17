@@ -4,7 +4,8 @@ Report table row: Framework practices.
 
 ## Inputs
 
-- Scan sections: Overview; Package manifests; Tool configuration files.
+- Scan sections: Overview; Package manifests; Other ecosystem manifests and
+  version files; Tool configuration files.
 - Documentation: the current official docs for the installed versions, fetched
   as described below.
 

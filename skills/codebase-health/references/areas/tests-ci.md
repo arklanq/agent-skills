@@ -49,8 +49,9 @@ Tests are only useful when the team trusts them.
   `.skip`, removed assertions or loosened expected values in the same commit
   as a code change.
 - Configuration: one unit test runner per project, fitting the build tool;
-  test environment set per need (DOM emulation only where the DOM is needed), setup files that are actually used, coverage thresholds
-  that reflect reality, no duplicated config between workspace packages.
+  test environment set per need (DOM emulation only where the DOM is needed),
+  setup files that are actually used, coverage thresholds that reflect
+  reality, no duplicated config between workspace packages.
 - End-to-end: stable locators (roles, labels, test IDs) instead of selectors
   tied to markup structure, the dev server reused locally, traces or videos only
   on failure or retry, a sensible worker count, only the browsers that matter.
@@ -98,10 +99,11 @@ CI should be correct, current, fast and cheap.
   runner labels (for example hosted and self-hosted), group by label too,
   because queue times differ.
 - Speed and cost: dependency caching, a frozen-lockfile install with the
-  project's package manager instead of a plain install, `concurrency` with `cancel-in-progress` for pull
-  requests, path filters for docs-only changes, `timeout-minutes` on jobs, jobs
-  parallelized where independent, expensive suites (e2e, visual) limited to where
-  they add value, matrices no wider than needed, artifact retention set.
+  project's package manager instead of a plain install, `concurrency` with
+  `cancel-in-progress` for pull requests, path filters for docs-only changes,
+  `timeout-minutes` on jobs, jobs parallelized where independent, expensive
+  suites (e2e, visual) limited to where they add value, matrices no wider than
+  needed, artifact retention set.
 - Duplication: the same steps copied across workflows instead of a reusable
   workflow or composite action.
 - Automation: Dependabot or Renovate configured and its PRs not piling up.

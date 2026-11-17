@@ -61,7 +61,9 @@ feature from scratch instead of finding the existing mechanism.
 - Parallel UI primitives: several button, input, modal or badge components with
   overlapping props instead of one primitive with variants.
 - Several libraries for the same job: two date libraries, two state managers,
-  two icon sets, two HTTP clients, two CSS approaches, two test runners.
+  two icon sets, two HTTP clients, two CSS approaches, two test runners. Which
+  one stays is usually the user's call: fill "Needs decision" with the options
+  and what each would cost to keep.
 - Versioned or copied modules (`v1/`, `v2/`, `-new`, `-copy`, `Legacy`): decide
   which version is live and remove the rest.
 - Exact duplicate files and assets (from the scan).
@@ -69,22 +71,12 @@ feature from scratch instead of finding the existing mechanism.
 
 ## AI-Agent Anti-Patterns
 
-Quick list to keep in mind while reviewing this area:
+The damage agents typically leave in structure and reuse:
 
 - New helper or component written next to an existing one that does the same.
-- Another boolean flag or status string added for each new case instead of
-  extending one explicit state.
 - Copies with suffixes (`v2`, `new`, `copy`, `fixed`) and the old version kept.
 - God files that grew by appending instead of splitting.
-- Plan, summary, progress and report Markdown files in the repository.
-- Narrating comments and oversized JSDoc.
-- Suppressions (`any`, `@ts-ignore`, `eslint-disable`) added to make errors go
-  away.
-- Tests weakened, skipped or rewritten to pass instead of fixing the code.
-- Defensive checks, fallbacks and try/catch for cases that cannot happen.
-- New dependencies added for trivial tasks.
-- Configuration options copied without need, including outdated ones.
-- One-off scripts left behind after a task.
 
-Patterns in this list that belong to another area (see "Owned by Other Areas")
-are checked by that area's subagent.
+The other typical agent damage (narrating comments, suppressions, weakened
+tests, plan files, needless dependencies, one-off scripts) is checked by the
+areas that own it.

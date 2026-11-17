@@ -1,6 +1,6 @@
 ---
 name: codebase-health
-description: Review a repository's structural health and maintainability, with a front-end focus, then fix what the user approves. Checks file organization, oversized files and flat directories, duplicated logic instead of reuse, flaky or dead tests, CI/CD and test configuration, framework best practices, outdated or vulnerable dependencies, Node.js and package-manager setup, dead scripts, leftover files, documentation bloat, excessive comments and non-English code. Use when the user asks for a codebase or repo health check, maintainability or tech-debt review, cleanup or tidy-up, a check of what AI agents did to the codebase, even if they never say "health". Assumes a Git repository hosted on GitHub. Not for reviewing a single diff or PR, or for a dedicated security audit.
+description: Review a repository's structural health and maintainability, with a front-end and JavaScript/TypeScript focus that also works for other stacks, then fix what the user approves. Checks file organization, oversized files and flat directories, duplicated logic instead of reuse, flaky or dead tests, CI/CD and test configuration, framework best practices, outdated or vulnerable dependencies, Node.js (or other runtime) and package-manager setup, dead scripts, leftover files, documentation bloat, excessive comments and non-English code. Use when the user asks for a codebase or repo health check, maintainability or tech-debt review, cleanup or tidy-up, a check of what AI agents did to the codebase, even if they never say "health". Assumes a Git repository hosted on GitHub. Not for reviewing a single diff or PR, or for a dedicated security audit.
 ---
 
 # Codebase Health
@@ -18,9 +18,12 @@ files during the review.
 ## Requirements
 
 The skill assumes a Git repository hosted on GitHub and the GitHub CLI (`gh`),
-authenticated, which it uses for CI history, pull requests and merges. Nothing
-else is assumed: the checks apply to any language, framework, package manager
-or CI provider.
+authenticated, which it uses for CI history, pull requests and merges.
+
+The checks are written for front-end and JavaScript/TypeScript projects and
+name their tools directly: Node.js, Bun, TypeScript, `package.json`,
+`npm-check-updates`, GitHub Actions. In another stack or CI provider, use the
+equivalent tool, file or command, or skip a check that has no equivalent.
 
 If `gh` is missing or not authenticated, still run the review, list the checks
 that needed it under "Not checked" in the report, and ask the user how to
@@ -58,8 +61,8 @@ already use: dead-code and duplication tools (`knip`, `depcheck`, `ts-prune`,
 `madge`, `jscpd`) and an update checker for the project's ecosystem (for
 example `npm-check-updates` for JavaScript). Offer to run them with the
 ecosystem's runner (for example `npx`, `pnpm dlx`, `yarn dlx`, `bunx` or a
-Maven plugin goal) and wait for the user's answer. Never add them to the project during the
-review. Skip the question when nothing applies.
+Maven plugin goal) and wait for the user's answer. Never add them to the
+project during the review. Skip the question when nothing applies.
 
 ## Step 3: Review the Areas with Subagents
 

@@ -5,8 +5,9 @@ leftover files (scripts part only).
 
 ## Inputs
 
-- Scan sections: Overview; Package manifests; Environment and package manager
-  files; CI/CD and automation files (for runtime versions only).
+- Scan sections: Overview; Package manifests; Other ecosystem manifests and
+  version files; Environment and package manager files; CI/CD and automation
+  files (for runtime versions only).
 - Audit and outdated commands: run the package manager's outdated and audit
   commands (for example `npm outdated` and `npm audit`, `pnpm outdated` and
   `pnpm audit`, `bun outdated` and `bun audit`, `yarn npm audit`). They need
@@ -56,7 +57,7 @@ Leave these to the named area even when you notice them:
   is usually Medium or Low. Then weigh the advisory's own severity.
 - Outdated majors, especially the framework, build tool, test runner, TypeScript
   and lint tooling. Note how far behind and whether the version is still
-  supported.
+  supported. When the update checker ran, list them only in its finding below.
 - Available updates from the update checker: return them as one finding that
   proposes updating all dependencies with that tool, with major updates listed
   separately because they get their own fix batch.

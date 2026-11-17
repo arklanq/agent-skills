@@ -77,7 +77,8 @@ files | awk -F/ '{ print (NF > 1 ? $1 "/" : $1) }' | sort | uniq -c | sort -rn |
 section 'Package manifests'
 MANIFESTS=$(files | grep -E '(^|/)package\.json$' || true)
 if [ -z "$MANIFESTS" ]; then
-  echo '(none)'
+  echo '(no package.json: the JavaScript-specific sections below may be empty;'
+  echo 'use "Other ecosystem manifests" to find the project'"'"'s own files)'
 elif command -v node >/dev/null 2>&1; then
   echo "$MANIFESTS" | while IFS= read -r m; do
     node -e '
@@ -99,6 +100,9 @@ else
   echo 'node not found; read these manifests directly:'
   echo "$MANIFESTS"
 fi
+
+section 'Other ecosystem manifests and version files (paths only)'
+files | grep -E '(^|/)(pom\.xml|build\.gradle(\.kts)?|settings\.gradle(\.kts)?|gradle\.properties|pyproject\.toml|requirements[^/]*\.txt|Pipfile|setup\.py|setup\.cfg|uv\.lock|poetry\.lock|go\.mod|Cargo\.toml|Gemfile|composer\.json|[^/]+\.csproj|global\.json|\.python-version|\.java-version|\.ruby-version|\.sdkmanrc)$' | head -40 || echo '(none)'
 
 section 'Environment and package manager files'
 grep -E '(^|/)(package-lock\.json|npm-shrinkwrap\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml|yarn\.lock|bun\.lockb?|\.nvmrc|\.node-version|\.tool-versions|\.?mise\.toml|\.npmrc|\.yarnrc(\.yml)?|bunfig\.toml|\.yarn/releases/[^/]+|deno\.jsonc?|Dockerfile[^/]*|docker-compose[^/]*|\.devcontainer/[^/]+|\.env[^/]*)$' "$FILES" | grep -v '/node_modules/' || echo '(none)'

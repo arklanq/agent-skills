@@ -9,9 +9,13 @@ so the main agent can merge the areas into one report.
   repository. Commands you run, such as tests, may write files Git ignores
   (coverage, caches); that is fine. If a command changes a tracked file or
   leaves a new untracked one, do not revert it yourself, because the user may
-  have had their own changes there: name the file under "Not Checked" so the
+  have had their own changes there: list the file under "Changed Files" so the
   main agent can tell the user.
-- Skip checks that do not apply to the stack.
+- The area files name JavaScript/TypeScript tools and files. In another stack,
+  use the equivalent tool, file or command, or skip a check that has no
+  equivalent.
+- When a scan section is empty or does not cover the project's stack, find the
+  equivalent files yourself instead of treating the area as clean.
 - Back every finding with evidence: `path:line`, a command output or a count.
   Mark anything unconfirmed as "to verify" instead of stating it as fact.
 - Judge by maintenance cost, not taste. A 400-line file that is a flat data table
@@ -70,6 +74,9 @@ libraries; state the options>
 
 ### Not Checked
 - <Check that could not run, and why.>
+
+### Changed Files
+- <Tracked file changed or new untracked file left by a command you ran.>
 ```
 
 Effort guide: S is under an hour, M is up to a day, L is more than a day.
