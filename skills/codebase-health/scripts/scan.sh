@@ -145,9 +145,13 @@ section "Flat directories (>= $MAX_DIR_FILES files directly inside)"
 files | awk '{ i = match($0, /\/[^\/]*$/); print (i ? substr($0, 1, i - 1) : ".") }' |
   sort | uniq -c | awk -v max="$MAX_DIR_FILES" '$1 >= max' | sort -rn | head -40
 
-section 'Change hotspots (most edited files in the last 500 commits)'
-git -c core.quotepath=off log -n 500 --format= --name-only -- "$SCOPE" 2>/dev/null |
-  grep -Ev "$EXCLUDE_RE" | grep -E "$SOURCE_RE" | sort | uniq -c | sort -rn | head -20 || true
+section 'Change hotspots (most edited files in the last 500 commits, with current size)'
+{ git -c core.quotepath=off log -n 500 --format= --name-only -- "$SCOPE" 2>/dev/null |
+  grep -Ev "$EXCLUDE_RE" | grep -E "$SOURCE_RE" | sort | uniq -c | sort -rn | head -20 || true; } |
+  while read -r edits path; do
+    if [ -f "$path" ]; then lines=$(wc -l <"$path" | tr -d ' '); else lines='deleted'; fi
+    printf '%5s edits %8s lines  %s\n' "$edits" "$lines" "$path"
+  done
 
 section 'Exact duplicate files (same content, different paths)'
 # The empty blob is skipped; duplicated assets and generated evidence count too.
@@ -180,9 +184,12 @@ section 'Agent-style notes and reports in the repository'
 grep -E '\.mdx?$' "$FILES" |
   grep -Ei '(^|/)[^/]*(summary|plan|notes|report|progress|todo|changes|implementation|analysis|fixes|refactor|status|review|handoff|session|walkthrough)[^/]*\.mdx?$' | head -40 || echo '(none)'
 
-section 'Documentation files by length'
-grep -E '\.mdx?$' "$FILES" | grep -Ev '(^|/)(node_modules|CHANGELOG)' | tr '\n' '\0' |
-  xargs -0 wc -l 2>/dev/null | grep -v ' total$' | sort -rn | head -40 || true
+section 'Documentation files by size (largest first; long lines hide length)'
+{ grep -E '\.mdx?$' "$FILES" | grep -Ev '(^|/)(node_modules|CHANGELOG)' || true; } |
+  while IFS= read -r doc; do
+    printf '%8d bytes %6d lines %6d longest line  %s\n' "$(wc -c <"$doc")" "$(wc -l <"$doc")" \
+      "$(awk '{ if (length > m) m = length } END { print m + 0 }' "$doc")" "$doc"
+  done | sort -rn | head -40
 
 section 'Test smells: focused, skipped and placeholder tests'
 test_files | grep_list '\b(it|test|describe|context)\.(only|skip|todo|fixme)\b|\b(xit|xdescribe|xtest|fit|fdescribe)\(|test\.fail\(' 60
