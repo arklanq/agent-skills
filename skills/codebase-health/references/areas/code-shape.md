@@ -46,6 +46,10 @@ goes.
   configured consistently.
 - Change hotspots that are also large files are the most expensive places in the
   repository; prioritize them.
+- For a typical change, trace which modules must change together. Look for an
+  implicit call order, shared state written by one module and read by another,
+  and callers that rely on another module's internals. Use files that often
+  change in the same commits as leads and confirm the dependency in code.
 
 ## Reuse and Duplication
 

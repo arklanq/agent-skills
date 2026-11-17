@@ -44,6 +44,12 @@ Tests are only useful when the team trusts them.
   failures investigated.
 - Over-mocking: tests that assert on mocks instead of behaviour, snapshot tests of
   whole pages that nobody reviews.
+- For a test under review, name a concrete regression, check that the test
+  exercises the affected path, and identify the assertion that would fail. If
+  the test relies on private state or helper calls, suggest asserting the
+  behaviour a caller can observe. Before proposing removal as a duplicate,
+  identify a remaining test that would catch the same failure at the relevant
+  boundary.
 - Tests weakened, skipped or rewritten to pass instead of fixing the code. Look
   at recent history of test files (`git log -p` over test paths) for added
   `.skip`, removed assertions or loosened expected values in the same commit
