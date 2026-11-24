@@ -102,7 +102,7 @@ else
 fi
 
 section 'Other ecosystem manifests and version files (paths only)'
-files | grep -E '(^|/)(pom\.xml|build\.gradle(\.kts)?|settings\.gradle(\.kts)?|gradle\.properties|pyproject\.toml|requirements[^/]*\.txt|Pipfile|setup\.py|setup\.cfg|uv\.lock|poetry\.lock|go\.mod|Cargo\.toml|Gemfile|composer\.json|[^/]+\.csproj|global\.json|\.python-version|\.java-version|\.ruby-version|\.sdkmanrc)$' | head -40 || echo '(none)'
+files | grep -E '(^|/)(pom\.xml|build\.gradle(\.kts)?|settings\.gradle(\.kts)?|gradle\.properties|pyproject\.toml|requirements[^/]*\.txt|Pipfile|setup\.py|setup\.cfg|uv\.lock|poetry\.lock|go\.mod|Cargo\.toml|Gemfile|composer\.json|[^/]+\.csproj|global\.json|\.python-version|\.java-version|\.ruby-version|\.sdkmanrc)$' | sed -n '1,40p' || echo '(none)'
 
 section 'Environment and package manager files'
 grep -E '(^|/)(package-lock\.json|npm-shrinkwrap\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml|yarn\.lock|bun\.lockb?|\.nvmrc|\.node-version|\.tool-versions|\.?mise\.toml|\.npmrc|\.yarnrc(\.yml)?|bunfig\.toml|\.yarn/releases/[^/]+|deno\.jsonc?|Dockerfile[^/]*|docker-compose[^/]*|\.devcontainer/[^/]+|\.env[^/]*)$' "$FILES" | grep -v '/node_modules/' || echo '(none)'
