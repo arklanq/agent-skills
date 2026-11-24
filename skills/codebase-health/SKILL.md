@@ -1,6 +1,6 @@
 ---
 name: codebase-health
-description: Review a repository's structural health and maintainability, with a front-end focus, then fix what the user approves. Checks file organization, oversized files and flat directories, duplicated logic instead of reuse, flaky or dead tests, CI/CD and test configuration, framework best practices, outdated or vulnerable dependencies, Node.js and package-manager setup, dead scripts, leftover files, documentation bloat, excessive comments and non-English code. Use when the user asks for a codebase or repo health check, maintainability or tech-debt review, cleanup or tidy-up, a check of what AI agents did to the codebase, even if they never say "health". Assumes a Git repository hosted on GitHub. Not for reviewing a single diff or PR, or for a dedicated security audit.
+description: Review a repository's structural health and maintainability, with a front-end and JavaScript/TypeScript focus that also works for other stacks, then fix what the user approves. Checks file organization, oversized files and flat directories, duplicated logic instead of reuse, flaky or dead tests, CI/CD and test configuration, framework best practices, outdated or vulnerable dependencies, Node.js (or other runtime) and package-manager setup, dead scripts, leftover files, documentation bloat, excessive comments and non-English code. Use when the user asks for a codebase or repo health check, maintainability or tech-debt review, cleanup or tidy-up, a check of what AI agents did to the codebase, even if they never say "health". Assumes a Git repository hosted on GitHub. Not for reviewing a single diff or PR, or for a dedicated security audit.
 ---
 
 # Codebase Health
@@ -18,9 +18,12 @@ files during the review.
 ## Requirements
 
 The skill assumes a Git repository hosted on GitHub and the GitHub CLI (`gh`),
-authenticated, which it uses for CI history, pull requests and merges. Nothing
-else is assumed: the checks apply to any language, framework, package manager
-or CI provider.
+authenticated, which it uses for CI history, pull requests and merges.
+
+The checks are written for front-end and JavaScript/TypeScript projects and
+name their tools directly: Node.js, Bun, TypeScript, `package.json`,
+`npm-check-updates`, GitHub Actions. In another stack or CI provider, use the
+equivalent tool, file or command, or skip a check that has no equivalent.
 
 If `gh` is missing or not authenticated, still run the review, list the checks
 that needed it under "Not checked" in the report, and ask the user how to
@@ -37,76 +40,87 @@ deliver fixes before Step 7.
 - Identify the stack: frameworks with major versions, build tool, test runners,
   package manager, runtime, monorepo layout and deployment target.
 
-## Step 2: Collect Signals
+## Step 2: Collect Shared Signals
 
 Run the scan script from the repository, optionally with a scope path and
-thresholds (defaults: 350 lines per file, 20 files per directory):
+thresholds (defaults: 350 lines per file, 20 files per directory), and save its
+output to a file outside the repository, for example in the session scratchpad
+or system temp directory:
 
 ```bash
-<skill-location-dir>/scripts/scan.sh [path] [max-lines] [max-files-per-dir]
+<skill-location-dir>/scripts/scan.sh [path] [max-lines] [max-files-per-dir] > <scan-output-file>
 ```
 
-The script outputs the working directory first. Verify you are in the intended
-repository. Its sections are leads, not findings: generated files, fixtures,
-translation catalogs and intentional exceptions show up too. Confirm each lead by
-reading the code before it enters the report.
+Read the first lines of that file: the output starts with the working
+directory and the repository root. Verify you are in the intended repository.
+Each area subagent reads only the scan sections its area file names.
 
-Then gather what the script cannot:
+Subagents cannot ask the user anything, so settle tool permissions now. List
+the analysis tools below that fit the stack and that the project does not
+already use: dead-code and duplication tools (`knip`, `depcheck`, `ts-prune`,
+`madge`, `jscpd`) and an update checker for the project's ecosystem (for
+example `npm-check-updates` for JavaScript). Offer to run them with the
+ecosystem's runner (for example `npx`, `pnpm dlx`, `yarn dlx`, `bunx` or a
+Maven plugin goal) and wait for the user's answer. Never add them to the
+project during the review. Skip the question when nothing applies.
 
-- Dependencies: run the package manager's outdated and audit commands (for
-  example `npm outdated` and `npm audit`, `pnpm outdated` and `pnpm audit`,
-  `bun outdated` and `bun audit`, `yarn npm audit`). They need network access and
-  installed dependencies; if they cannot run, say so in the report.
-- Current versions: check the active Node.js LTS lines and package-manager
-  releases against an authoritative source (nodejs.org release data or
-  endoflife.date, the package registry), not memory.
-- Framework practices: do not use a memorized list of framework rules. Fetch
-  the current official documentation for the installed versions (Context7 MCP
-  when available, otherwise the official site) and derive the checks from it, as
-  described in section 4 of the checklist.
-- Dead code and dependencies: if the project already has `knip`, `depcheck`,
-  `ts-prune`, `madge` or `jscpd`, run it. Otherwise offer to run one with the
-  package runner of the project's package manager (for example `npx`, `pnpm dlx`,
-  `yarn dlx` or `bunx`) and wait for the user's answer; never add it to the
-  project during review.
-- Test health: run the test suite once if it is reasonably fast; note failures,
-  skipped tests and duration. Recent CI runs (`gh run list`) show flaky jobs:
-  the same job failing and passing on the same commit.
-- CI timing: measure where CI time goes instead of judging it from the
-  workflow files. Pull the jobs of the last 100-150 successful runs and split
-  each job's time into queue, setup and work, as described in section 6 of the
-  checklist. Report the 5 slowest jobs with the median seconds of each part.
-  If the project uses a CI provider other than GitHub Actions, use that
-  provider's API or CLI when available; otherwise list the check under
-  "Not checked".
+## Step 3: Review the Areas with Subagents
 
-## Step 3: Review Each Area
+The review is split into six areas. Each area file lists its inputs, checks and
+optional skills:
 
-Work through [references/checklist.md](references/checklist.md). It lists what to
-check per area, front-end specifics and the common AI-agent anti-patterns. For a
-large repository, when subagents are available, split the review by area (for
-example structure and reuse; tests and CI; dependencies and environment; code
-quality and framework practices), give each the scan output and the checklist
-section, then merge, deduplicate and verify their findings yourself.
+| Area | File |
+| --- | --- |
+| Structure, reuse and AI-agent anti-patterns | [references/areas/code-shape.md](references/areas/code-shape.md) |
+| Code quality, comments and language | [references/areas/code-quality.md](references/areas/code-quality.md) |
+| Framework and tooling practices | [references/areas/framework.md](references/areas/framework.md) |
+| Tests and CI/CD | [references/areas/tests-ci.md](references/areas/tests-ci.md) |
+| Dependencies, runtime and scripts | [references/areas/deps-runtime.md](references/areas/deps-runtime.md) |
+| Documentation and leftover files | [references/areas/docs-leftovers.md](references/areas/docs-leftovers.md) |
 
-Rules for findings:
+Start one subagent per area, all at once so they run in parallel. Do not read
+the area files yourself or load the optional skills they name; that is the
+subagents' work. Skip an area only when the user limited the scope and the area
+does not apply. Give each subagent this brief, filled in:
 
-- Back every finding with evidence: `path:line`, a command output or a count.
-  Mark anything unconfirmed as "to verify" instead of stating it as fact.
-- Judge by maintenance cost, not taste. A 400-line file that is a flat data table
-  is fine; a 300-line component mixing fetching, state and rendering may not be.
-- Group repeated instances into one finding with a list of locations.
-- Prefer a few precise findings over a long list of nitpicks.
+```markdown
+You review one area of a repository's maintainability. Work read-only.
 
-Severity:
+- Repository: <absolute path>; scope: <whole repository or path>.
+- Stack: <frameworks with versions, build tool, test runners, package manager,
+  runtime, monorepo layout, deployment target>.
+- Project conventions: <short summary of AGENTS.md, CLAUDE.md, CONTRIBUTING.md
+  and similar rules, or "none">.
+- Scan output: <scan-output-file>.
+- Tools the user approved running: <list, or "none">.
 
-- **Critical**: breaks builds, deploys or tests, exposes secrets, or has a known
-  exploitable vulnerability in shipped code.
-- **High**: makes routine changes expensive or risky (duplicated core logic, god
-  modules, untrustworthy tests, unsupported runtime).
-- **Medium**: noticeable friction or waste (slow or wasteful CI, outdated majors,
-  misleading docs, dead scripts).
-- **Low**: cleanup and polish.
+Read <skill-location-dir>/references/areas/<area>.md and do what it says. Follow
+<skill-location-dir>/references/finding-format.md and return only the result
+in that format.
+```
+
+If the host cannot start subagents, read
+[references/finding-format.md](references/finding-format.md) first, then review
+the areas yourself one at a time, reading one area file, finishing it and
+writing down its result in that format before reading the next.
+
+When all subagents have returned, read
+[references/finding-format.md](references/finding-format.md) and merge their
+results:
+
+- Merge findings that describe the same problem from two areas, for example a
+  god file found in structure and in code quality, and keep the stronger
+  evidence.
+- Make severity consistent across areas by the definitions in that file.
+- Use dismissed leads only to drop the same item when another area reports
+  it as a finding without stronger evidence.
+- Check every Critical and High finding yourself by reading the cited code or
+  rerunning the command. Downgrade or drop what does not hold up, and keep
+  "to verify" on anything you could not confirm.
+- Collect the status rows, extra tables and "Not checked" items for the report.
+  When two areas report parts of the same table row, keep the worse status and
+  join their summaries. If a subagent reports tracked or new files changed by
+  its commands, list them in the report and tell the user in the chat summary.
 
 ## Step 4: Write the Report
 
@@ -151,8 +165,9 @@ change has to be made several times.
   remove `PrimaryButton`.
 
 **Batch 2: Speed up CI**
-- **M4 (medium):** Every pull request installs dependencies from scratch. Add
-  caching to save about 2 minutes per run.
+- **M4 (medium):** On the same test job and runner type, median setup took
+  3 minutes on 12 cache misses and 1 minute on 8 hits. The default branch
+  never saves this cache. Save it there and measure the effect on PR wait.
 
 **Needs your decision**
 - **M6 (medium):** The project uses two date libraries. Which one should stay?
@@ -175,11 +190,21 @@ and commit as you go; the user reviews the result as pull requests.
   commits and tell the user.
 - Record the baseline first: run the project's lint, typecheck, tests and build
   where available. Do not blame pre-existing failures on fixes.
+- When changing test selection, configuration or sharding, collect the test
+  reports from every affected job, matrix leg and shard before and after the
+  change. Compare executed cases by suite and test name across shards within
+  each environment. Investigate missing or newly skipped cases. For an approved
+  duplicate removal, name the remaining test that catches the same regression.
+  If only counts or partial reports exist, state what you could not verify.
 - Keep refactors behaviour-preserving. Move or merge code with its tests; update
   imports everywhere; prefer the existing mechanism when merging duplicates.
 - Before deleting a file, script or dependency, prove it is unused: search for
   references (including dynamic imports, config files, CI and docs) or use the
   dead-code tool. List untracked files before removing any of them.
+- When the user approved updating dependencies and the review used an update
+  checker (for example `npm-check-updates`), update with that tool in two
+  batches, reinstalling after each so the lockfile matches: first all minor
+  and patch updates (for example `ncu -u --target minor`), then the major ones.
 - Upgrade major dependency versions in their own batch and read the migration
   guide first.
 - After each batch, rerun the same checks and compare with the baseline. Do not
