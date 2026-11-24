@@ -61,6 +61,10 @@ Include when CI timing was measured. Median seconds over <N> successful runs,
 with the p90 of the total. Add a runner column when jobs ran on several runner
 labels.
 
+PR CI wait: <median over N comparable PR commits, last required check and
+dependency chain, or workflow-only timing and why>. Runner time: <median
+runner-minutes per commit or workflow run in the same sample>.
+
 | Workflow / job | Queue | Setup | Work | Total (p90) |
 | --- | --- | --- | --- | --- |
 | <workflow> / <job> | | | | |

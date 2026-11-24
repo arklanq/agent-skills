@@ -104,6 +104,17 @@ CI should be correct, current, fast and cheap.
   workflow files; they distort the numbers. When the workflows use several
   runner labels (for example hosted and self-hosted), group by label too,
   because queue times differ.
+- PR wait: for comparable PR commits, measure elapsed time from the first CI
+  run's creation to the last required check's completion. Identify that check
+  and trace the predecessors that delayed it using job timestamps and workflow
+  `needs`. If required checks are unknown or missing from the sample, report
+  only the observed workflow's elapsed time. Report runner-minutes separately
+  by summing job execution times, including jobs that ran in parallel.
+- CI savings: label each figure as an observed difference between comparable
+  runs, an upper bound (show the calculation), or a measured before-and-after
+  result. Give the sample size for each group and say whether the figure
+  describes PR wait or runner time. For cache changes, compare median total
+  setup time for confirmed hits and misses on the same job and runner type.
 - Speed and cost: dependency caching, a frozen-lockfile install with the
   project's package manager instead of a plain install, `concurrency` with
   `cancel-in-progress` for pull requests, path filters for docs-only changes,

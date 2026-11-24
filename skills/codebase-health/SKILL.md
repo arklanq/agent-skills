@@ -165,8 +165,9 @@ change has to be made several times.
   remove `PrimaryButton`.
 
 **Batch 2: Speed up CI**
-- **M4 (medium):** Every pull request installs dependencies from scratch. Add
-  caching to save about 2 minutes per run.
+- **M4 (medium):** On the same test job and runner type, median setup took
+  3 minutes on 12 cache misses and 1 minute on 8 hits. The default branch
+  never saves this cache. Save it there and measure the effect on PR wait.
 
 **Needs your decision**
 - **M6 (medium):** The project uses two date libraries. Which one should stay?
@@ -189,6 +190,12 @@ and commit as you go; the user reviews the result as pull requests.
   commits and tell the user.
 - Record the baseline first: run the project's lint, typecheck, tests and build
   where available. Do not blame pre-existing failures on fixes.
+- When changing test selection, configuration or sharding, collect the test
+  reports from every affected job, matrix leg and shard before and after the
+  change. Compare executed cases by suite and test name across shards within
+  each environment. Investigate missing or newly skipped cases. For an approved
+  duplicate removal, name the remaining test that catches the same regression.
+  If only counts or partial reports exist, state what you could not verify.
 - Keep refactors behaviour-preserving. Move or merge code with its tests; update
   imports everywhere; prefer the existing mechanism when merging duplicates.
 - Before deleting a file, script or dependency, prove it is unused: search for
