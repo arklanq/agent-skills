@@ -85,7 +85,7 @@ CI should be correct, current, fast and cheap.
   deprecated; runtime version read from the project's version file (for
   example `node-version-file`), not hard-coded in several jobs.
 - Measured time: for GitHub Actions, list recent successful runs with
-  `gh run list --status success --limit 150 --json databaseId,workflowName`,
+  `gh run list --status success --limit 150 --json databaseId,workflowName,event,headSha,createdAt`,
   then read each run's jobs with
   `gh api repos/{owner}/{repo}/actions/runs/<id>/jobs --paginate`. Each job has
   `created_at`, `started_at`, `completed_at` and timed `steps`. Split it into:
@@ -104,7 +104,8 @@ CI should be correct, current, fast and cheap.
   workflow files; they distort the numbers. When the workflows use several
   runner labels (for example hosted and self-hosted), group by label too,
   because queue times differ.
-- PR wait: for comparable PR commits, measure elapsed time from the first CI
+- PR wait: group runs for the same PR and head SHA, checking the event so
+  unrelated push or scheduled runs stay out. Measure from the first relevant
   run's creation to the last required check's completion. Identify that check
   and trace the predecessors that delayed it using job timestamps and workflow
   `needs`. If required checks are unknown or missing from the sample, report
