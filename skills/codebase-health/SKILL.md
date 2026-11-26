@@ -193,9 +193,13 @@ and commit as you go; the user reviews the result as pull requests.
 - When changing test selection, configuration or sharding, collect the test
   reports from every affected job, matrix leg and shard before and after the
   change. Compare executed cases by suite and test name across shards within
-  each environment. Investigate missing or newly skipped cases. For an approved
-  duplicate removal, name the remaining test that catches the same regression.
+  each environment. Investigate missing or newly skipped cases.
   If only counts or partial reports exist, state what you could not verify.
+- Before an approved duplicate removal or move to another test layer,
+  name the test that will still cover each distinct regression. Introduce each
+  regression temporarily in the local code and verify that the named test fails
+  on the expected assertion. Revert the temporary change and confirm the test
+  passes. Keep the original test if you cannot confirm equivalent coverage.
 - Keep refactors behaviour-preserving. Move or merge code with its tests; update
   imports everywhere; prefer the existing mechanism when merging duplicates.
 - Before deleting a file, script or dependency, prove it is unused: search for

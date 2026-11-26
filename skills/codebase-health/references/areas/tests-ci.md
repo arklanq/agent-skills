@@ -39,7 +39,10 @@ Tests are only useful when the team trusts them.
 - Focused tests (`.only`) committed: they silently disable the rest of the suite.
 - Flaky patterns: fixed waits (`waitForTimeout`, `cy.wait(1000)`, `setTimeout`),
   real time and dates without fake timers, real network calls, shared mutable
-  state between tests, order dependence, random data without a seed.
+  state between tests, order dependence, random data without a seed. If you
+  suspect shared state or order dependence, run the suspect test alone and rerun
+  the affected suite in shuffled order if the runner supports it. Record the
+  seed when available so a failing order can be reproduced.
 - Retries used to hide flakiness: retries should be CI-only and low, with
   failures investigated.
 - Over-mocking: tests that assert on mocks instead of behaviour, snapshot tests of
@@ -61,17 +64,27 @@ Tests are only useful when the team trusts them.
 - End-to-end: stable locators (roles, labels, test IDs) instead of selectors
   tied to markup structure, the dev server reused locally, traces or videos only
   on failure or retry, a sensible worker count, only the browsers that matter.
-- Speed: slow suites get skipped by people; note the duration and the slowest
-  files when you run them.
+  Suggest moving cases to the least expensive test layer that still catches the
+  same failure. For example, cover client-side validation variants in component
+  tests and keep a browser case for a critical flow that exercises the UI and
+  backend together.
+- Speed: for a slow suite, use available runner timings or logs to separate test
+  execution from setup. Identify setup that runs once for the suite and setup
+  that repeats per worker, per file (for example, imports or app startup), or per
+  test (for example, creating fresh fixtures). Report which costs dominate and
+  which timings the available data could not separate.
 - Test file size and balance: a file with many tests, or with loops or `.each`
   generating them, is a lead even below the line threshold. When the runner
   keeps a file on one worker (no `fullyParallel` in Playwright, Vitest's
   default per-file workers, sharding by file), the slowest file sets the floor
   for the whole run or shard. Take per-file durations from the runner's JSON
   report or CI log (Playwright's "Slow test file" lines), compare the slowest
-  file with the shard or run total, and split files by feature or scenario
-  until no single file dominates. Loops that reload the page for every case
-  usually belong in a unit test, with one end-to-end case left.
+  file with the shard or run total, and estimate the extra setup work before
+  recommending a split. Multiply each measured setup cost by the number of
+  added workers, files or tests that would repeat it. If repeated setup
+  dominates, propose reducing it first while preserving test isolation. For an
+  approved split, compare setup work and elapsed time against the baseline with
+  comparable runner settings and test scope.
 
 ## CI/CD
 
