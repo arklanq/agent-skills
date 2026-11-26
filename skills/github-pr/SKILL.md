@@ -1,6 +1,6 @@
 ---
 name: github-pr
-description: Create or update GitHub pull requests with gh CLI, safe base-branch selection, and optional ticket metadata, and wait for their checks or merge. Use for every GitHub pull request you create or update, whether the user asks for one or you open it as part of a task, and when remaining steps wait for a pull request's checks or merge.
+description: Create or update GitHub pull requests with gh CLI, safe base-branch selection, and optional ticket metadata, and wait for their checks or merge or for changes on a GitHub Project board. Use for every GitHub pull request you create or update, whether the user asks for one or you open it as part of a task, when remaining steps wait for a pull request's checks or merge, and when you take work from a GitHub Project board.
 ---
 
 # GitHub Pull Request
@@ -152,6 +152,27 @@ Act on the result:
 | `failed`, `conflict` | Fix it, push, and start a new watcher. If another tool reports the same failure, handle it once. |
 | `blocked`, `draft` | Tell the user what the PR waits for. |
 | `closed`, `timeout`, `error` | Check the PR and report its state to the user. |
+
+### Watching a project board
+
+When the user asks you to take work from a GitHub Project board, for example
+"start a task when a slot frees up in In progress", wait for board changes with
+the bundled watcher:
+
+```bash
+<skill-location-dir>/scripts/board-watch.sh <owner> <project-number> --status "Ready,In progress" --state-file <path>
+```
+
+- Run it in the background like `pr-watch.sh`. It checks the board every 15
+  seconds and exits after 3 hours at most.
+- It reports items that enter, leave or move between the watched Status
+  columns, one per line after `board-watch: <owner>/<number> -> changed: ...`.
+  Reordering cards is not a change. Read the board yourself before acting,
+  because the report shows only what changed.
+- Keep the same `--state-file` between runs. The next run then reports changes
+  made while you were acting on the previous ones.
+- After handling a result, `timeout` included, start a new watcher. On `error`,
+  check the owner, the project number and the `project` scope of the `gh` token.
 
 ### Finalization
 
