@@ -82,9 +82,7 @@ Tests are only useful when the team trusts them.
   file with the shard or run total, and estimate the extra setup work before
   recommending a split. Multiply each measured setup cost by the number of
   added workers, files or tests that would repeat it. If repeated setup
-  dominates, propose reducing it first while preserving test isolation. For an
-  approved split, compare setup work and elapsed time against the baseline with
-  comparable runner settings and test scope.
+  dominates, propose reducing it first while preserving test isolation.
 
 ## CI/CD
 
@@ -140,3 +138,20 @@ CI should be correct, current, fast and cheap.
 - Automation: Dependabot or Renovate configured and its PRs not piling up.
 - Deployment config (`vercel.json`, `netlify.toml`, Dockerfiles): no stale
   settings for removed routes, matching runtime versions, no secrets in files.
+
+## Verify Approved Fixes
+
+Use these checks during Step 6.
+
+- When changing test selection, configuration or sharding, collect the test
+  reports from every affected job, matrix leg and shard before and after the
+  change. Compare executed cases by suite and test name across shards within
+  each environment. Investigate missing or newly skipped cases.
+  If only counts or partial reports exist, state what you could not verify.
+- Before an approved duplicate removal or move to another test layer,
+  name the test that will still cover each distinct regression. Introduce each
+  regression temporarily in the local code and verify that the named test fails
+  on the expected assertion. Revert the temporary change and confirm the test
+  passes. Keep the original test if you cannot confirm equivalent coverage.
+- For an approved file split, compare setup work and elapsed time against the
+  baseline with comparable runner settings and test scope.
