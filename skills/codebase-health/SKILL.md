@@ -188,14 +188,10 @@ and commit as you go; the user reviews the result as pull requests.
   `codebase-health/<YYYY-MM-DD>`, following the project's branch naming if it has
   one. If the working tree has uncommitted changes, leave them out of your
   commits and tell the user.
+- For each batch, read the relevant [area references](#step-3-review-the-areas-with-subagents)
+  and follow their instructions for verifying approved fixes.
 - Record the baseline first: run the project's lint, typecheck, tests and build
   where available. Do not blame pre-existing failures on fixes.
-- When changing test selection, configuration or sharding, collect the test
-  reports from every affected job, matrix leg and shard before and after the
-  change. Compare executed cases by suite and test name across shards within
-  each environment. Investigate missing or newly skipped cases. For an approved
-  duplicate removal, name the remaining test that catches the same regression.
-  If only counts or partial reports exist, state what you could not verify.
 - Keep refactors behaviour-preserving. Move or merge code with its tests; update
   imports everywhere; prefer the existing mechanism when merging duplicates.
 - Before deleting a file, script or dependency, prove it is unused: search for
